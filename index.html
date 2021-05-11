@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>ZIM - Code Creativity</title>
+
+    <!-- Welcome to ZIM at https://zimjs.com - Code Creativity!                              -->
+    <!-- ZIM runs on the HTML Canvas powered by JavaScript and CreateJS https://createjs.com -->
+    <!-- Founded by Inventor Dan Zen - http://danzen.com - Canadian New Media Award Winner   -->
+    <!-- ZIM is free to use. You can donate to help improve ZIM at https://zimjs.com/donate  -->
+
+    <script src="https://zimjs.org/cdn/1.2.3/createjs_min.js"></script>
+    <script src="https://zimjs.org/cdn/10.7.1/zim.js"></script>
+    <!-- use zimjs.com/distill for minified individual functions! -->
+
+    <script>
+      const scaling = "fit"; // this will resize to fit inside the screen dimensions
+      const width = 1200;
+      const height = 768;
+      const color = dark; // ZIM colors like green, blue, pink, faint, clear, etc.
+      const outerColor = light; // any HTML colors like "violet", "#333", etc. are fine to use
+
+      const frame = new Frame(scaling, width, height, color, outerColor);
+      frame.on("ready", () => {
+        // ES6 Arrow Function - like function(){}
+        zog("ready from ZIM Frame"); // logs in console (F12 - choose console)
+
+        zog(
+          "this game move the basket collecting eggs and avoid shit of bird," +
+            "you can collect shit and avoid eggs if you want"
+        );
+
+        zog("name: Nguyen Quoc Thong");
+
+        const stage = frame.stage;
+        let stageW = frame.width;
+        let stageH = frame.height;
+
+        //loading the imange from assets
+        frame.loadAssets(
+          [
+            "bird.png",
+            "nature.jpg",
+            "egg.png",
+            "basket.png",
+            "dirty.png",
+            "like.png",
+            "boredshit.png"
+          ],
+          "assets/"
+        );
+
+        //start frame when finish the loading
+        frame.on("complete", () => {
+          //put the background image
+          frame
+            .asset("nature.jpg")
+            .addTo(stage)
+            .sca(0.215);
+
+          //add basket to stage
+          var basket = frame
+            .asset("basket.png")
+            .sca(0.05)
+            .pos({ x: stageW / 2 - 50, y: stageH - 200 })
+            .drag();
+
+          //loop to create bird
+          interval(1000, () => {
+            //create new bird each time and make it move throgh stage
+            var bird = new zim.Sprite(frame.asset("bird.png"), 4, 2)
+              .pos(-50, rand(stageH / 2))
+              .sca(0.2)
+              .run({ time: 1100, loop: true })
+              .animate({
+                props: { x: stageW + 50 },
+                time: 5000,
+                ease: "linear"
+              });
+
+            // set random time for bird to create eggs
+            timeout(rand(5000), () => {
+              var egg = frame
+                .asset("egg.png")
+                .clone()
+                .center()
+                .centerReg()
+                .loc(bird.x, bird.y)
+                .sca(0.05)
+                .animate({
+                  props: { rotation: 360 },
+                  time: 1500,
+                  ease: "linear",
+                  loop: true
+                })
+                .animate({
+                  props: { y: stageH + 100 },
+                  time: 5000,
+                  ease: "linear"
+                });
+
+              //create like image when basket hit the egg and add to stage
+              var like = frame
+                .asset("like.png")
+                .clone()
+                .sca(0.03);
+
+              //image appear when eggs hitting the basket
+              Ticker.add(() => {
+                if (basket.hitTestBounds(egg)) {
+                  like.loc(egg).animate({ alpha: 0 }, 400);
+                  egg.removeFrom();
+                  stage.update();
+                }
+              });
+            });
+
+            //set random time for bird to create dirty things.
+            timeout(rand(5000), () => {
+              var dirty = frame
+                .asset("dirty.png")
+                .clone()
+                .loc(bird.x, bird.y)
+                .sca(0.04)
+                .animate({
+                  props: { y: stageH + 100 },
+                  time: 5000,
+                  ease: "linear"
+                });
+
+              //create bored shit image and add to stage
+              var boredshit = frame
+                .asset("boredshit.png")
+                .clone()
+                .sca(0.05);
+
+              //appear when hitting the basket
+              Ticker.add(() => {
+                if (basket.hitTestBounds(dirty)) {
+                  boredshit.loc(dirty).animate({ alpha: 0 }, 400);
+                  dirty.removeFrom();
+                  stage.update();
+                }
+              });
+            });
+          });
+        });
+
+        stage.update();
+      }); // end of ready
+    </script>
+
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+  </head>
+
+  <body>
+    <!-- canvas with id="myCanvas" is made by zim Frame -->
+  </body>
+</html>
